@@ -26,10 +26,10 @@ IMAGE_SIZE_RECOVER_RATIO = int(1/IMAGE_SIZE_REDUCTION_RATIO)
 
 global img, win_img, file_name, file_extension, parent_dir, rows, cols, draw, pts_cnt, pts
 
-def is_in_range(idx):
+def is_in_range(idx): # 인덱싱 에러 확인용 함수
     return 0 <= idx <= len(path_list)
 
-def set_variables(idx):
+def set_variables(idx): # 변수 초기화 함수
     global img, win_img, file_name, file_extension, parent_dir, rows, cols, draw, pts_cnt, pts
     
     img = cv2.imread(path_list[idx])
@@ -41,7 +41,7 @@ def set_variables(idx):
     pts_cnt = 0
     pts = np.zeros((4,2), dtype=np.float32)
 
-def onChange(pos):
+def onChange(pos): # 슬라이더 변화 감지 콜백 함수 구현
     global win_img
     idx = cv2.getTrackbarPos("idx", WIN_NAME)
     if not is_in_range(idx):
@@ -49,7 +49,7 @@ def onChange(pos):
     set_variables(idx)
     cv2.imshow(WIN_NAME, win_img)
 
-def onMouse(event, x, y, flags, param):  #마우스 이벤트 콜백 함수 구현 ---① 
+def onMouse(event, x, y, flags, param):  # 마우스 이벤트 콜백 함수 구현
     global img, win_img, file_name, file_extension, parent_dir, rows, cols, draw, pts_cnt, pts
     if event == cv2.EVENT_LBUTTONDOWN:  
         cv2.circle(draw, (x,y), 10, (0,255,0), -1) # 좌표에 초록색 동그라미 표시
@@ -58,7 +58,7 @@ def onMouse(event, x, y, flags, param):  #마우스 이벤트 콜백 함수 구�
         pts[pts_cnt] = [x,y]            # 마우스 좌표 저장
         pts_cnt+=1
         if pts_cnt == 4:                       # 좌표가 4개 수집됨 
-            # 좌표 4개 중 상하좌우 찾기 ---② 
+            # 좌표 4개 중 상하좌우 찾기
             sm = pts.sum(axis=1)                 # 4쌍의 좌표 각각 x+y 계산
             diff = np.diff(pts, axis = 1)       # 4쌍의 좌표 각각 x-y 계산
 
@@ -70,7 +70,7 @@ def onMouse(event, x, y, flags, param):  #마우스 이벤트 콜백 함수 구�
             # 변환 전 4개 좌표 
             pts1 = np.float32([topLeft, topRight, bottomRight , bottomLeft])
 
-            # 변환 후 영상에 사용할 서류의 폭과 높이 계산 ---③ 
+            # 변환 후 영상에 사용할 서류의 폭과 높이 계산
             w1 = abs(bottomRight[0] - bottomLeft[0])    # 상단 좌우 좌표간의 거리
             w2 = abs(topRight[0] - topLeft[0])          # 하단 좌우 좌표간의 거리
             h1 = abs(topRight[1] - bottomRight[1])      # 우측 상하 좌표간의 거리
@@ -85,9 +85,11 @@ def onMouse(event, x, y, flags, param):  #마우스 이벤트 콜백 함수 구�
             mtrx = cv2.getPerspectiveTransform(pts1*IMAGE_SIZE_RECOVER_RATIO, pts2*IMAGE_SIZE_RECOVER_RATIO)
             # 원근 변환 적용
             result = cv2.warpPerspective(img, mtrx, (width*IMAGE_SIZE_RECOVER_RATIO, height*IMAGE_SIZE_RECOVER_RATIO))
+            # 처리한 이미지 정리용 폴더 생성 후 저장
             if not os.path.isdir(f'{parent_dir}/scanned'):
                 os.mkdir(f'{parent_dir}/scanned')
             cv2.imwrite(f'{parent_dir}/scanned/{file_name}_scanned.{file_extension}', result)
+            # 처리된 이미지 확인창 생성
             win_result = cv2.resize(result, (0, 0), fx=IMAGE_SIZE_REDUCTION_RATIO, fy=IMAGE_SIZE_REDUCTION_RATIO)
             cv2.imshow('scanned', win_result)
             print(f"{parent_dir}/scanned/{file_name}_scanned.{file_extension} saved!")
@@ -97,8 +99,8 @@ path_list = sorted(list(glob(PATH_NAME)))
 set_variables(0)
 
 cv2.imshow(WIN_NAME, win_img)
-cv2.createTrackbar("idx", WIN_NAME, 0, len(path_list)-1, onChange)
-cv2.setMouseCallback(WIN_NAME, onMouse)    # 마우스 콜백 함수를 GUI 윈도우에 등록 ---④
+cv2.createTrackbar("idx", WIN_NAME, 0, len(path_list)-1, onChange) # 이미지 인덱싱용 슬라이더 GUI 윈도우에 등록
+cv2.setMouseCallback(WIN_NAME, onMouse)    # 마우스 콜백 함수를 GUI 윈도우에 등록
 
 while True:
     if cv2.waitKey() == ord('z'):
