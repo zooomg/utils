@@ -2,8 +2,10 @@
 폰 카메라로 찍은 사진, pc에서 손으로 스캔하기
 코드 참고: https://github.com/BaekKyunShin/OpenCV_Project_Python/blob/master/05.geometric_transform/perspective_scan.py
 
-사용법
+# 변수 설정
 - 스캔을 원하는 이미지들이 들어가있는 경로를 'FOLDER_PATH'에 작성
+- 이미지가 너무 해상도가 높을 경우 'IMAGE_SIZE_RECOVER_RATIO'로 가로세로 크기를 N배 줄이겠다고 정의
+# 사용법
 - 스캔화를 원하는 부분 꼭지점 4개 찍기
 - 4개 점 찍은 후 나오는 화면으로 스캔 결과 확인
 - z, c 키로 앞뒤 이미지 이동 가능
